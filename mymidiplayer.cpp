@@ -2,6 +2,7 @@
 #include "MidiFile.h"
 
 #include <iostream>
+#include <thread>
 
 using namespace std;
 
@@ -24,7 +25,54 @@ int main(int argc, char** argv)
     fluid_synth_sfload(synth, sfPath, 1);
     fluid_synth_set_gain(synth, 1.0);
 
-    //todo: 解析midi播放
+    MidiFile midiFile;
+    auto state = midiFile.read(midiPath);
+    if(state == 0) {
+        cout<<"bad midi file!"<<endl;
+        return 1;
+    }
+
+    int tpq = midiFile.getTicksPerQuarterNote();
+    cout<<"tpq = "<<tpq<<endl;
+
+    int trackCount = midiFile.getTrackCount();
+    cout<<"trackCount = "<<trackCount<<endl;
+    if(trackCount <= 1){
+        cout<<"music track not found!"<<endl;
+        return 1;
+    }
+
+    midiFile.joinTracks();
+    midiFile.deltaTicks();
+    int track = 0;
+    int eventCount = midiFile.getEventCount(track);
+    cout<<eventCount<<endl;
+
+    for (int i = 0; i < eventCount; ++i) {
+        MidiEvent event = midiFile.getEvent(track, i);
+        int tick = event.tick;
+        int key  = event.getKeyNumber();
+        int velocity = event.getVelocity();
+        cout<<"tick:"<<tick<<"\t"<<"key:"<<key<<"\t"<<"velocity:"<<velocity<<endl;
+        if(key == -1){
+            continue;
+        }
+
+        if(tick == 0){
+            if(event.isNoteOn()){
+                fluid_synth_noteon(synth, 0, key, velocity);
+            }
+            else if(event.isNoteOff()){
+                fluid_synth_noteoff(synth, 0, key);
+            }
+            else{
+                cout<<"other event"<<endl;
+            }
+        }
+        else{
+            this_thread::sleep_for(std::chrono::milliseconds(int(midiFile.getTimeInSeconds(tick) * 1000)));
+        }
+    }
 
     /* Clean up */
     delete_fluid_audio_driver(adriver);
