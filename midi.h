@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
+#include <functional>
 
 struct NoteEvent
 {
@@ -15,7 +15,6 @@ struct NoteEvent
     uint16_t tickMs = 0;
 };
 
-using Music = NoteEvent[];
 using NoteHandle = std::function<void(NoteEvent)>;
 
 inline void playMusic(const NoteEvent* music, uint16_t len, const NoteHandle& handle) {
