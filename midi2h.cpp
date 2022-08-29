@@ -11,8 +11,7 @@ using namespace std;
 
 std::vector<NoteEvent> noteEvents;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc < 2) {
         cout << "Wrong argument! Usage example:" << endl;
         cout << argv[0] << " midi.mid" << endl;
@@ -40,22 +39,25 @@ int main(int argc, char **argv)
 
     midiFile.joinTracks();
     midiFile.deltaTicks();
-    int track = 0;
-    int eventCount = midiFile.getEventCount(track);
+    int eventCount = midiFile.getEventCount(0);
     cout << eventCount << endl;
 
     for (int i = 0; i < eventCount; ++i) {
-        MidiEvent event = midiFile.getEvent(track, i);
+        MidiEvent event = midiFile.getEvent(0, i);
+        int track = event.track;
         int tick = event.tick;
         int tickMs = (int) (midiFile.getTimeInSeconds(tick) * 1000);
         int key = event.getKeyNumber();
         int velocity = event.getVelocity();
-        cout << "tick:" << tick << "\t" << "key:" << key << "\t" << "tickMs:" << tickMs
+        cout << "track:" << track
+             << "\t" << "tick:" << tick
+             << "\t" << "key:" << key
+             << "\t" << "tickMs:" << tickMs
              << "\t" << "velocity:" << velocity << endl;
-        if (key == -1) {
-            continue;
-        }
+        if (key == -1) continue;
+        if (track == 0) continue;
         NoteEvent e;
+        e.track = track;
         e.isOn = event.isNoteOn();
         e.key = key;
         e.tickMs = tickMs;
@@ -65,8 +67,8 @@ int main(int argc, char **argv)
     std::stringstream output;
     output << R"(#pragma once
 const NoteEvent music[] = {)";
-    for (const auto &e : noteEvents) {
-        output << "{" << (e.isOn ? "true" : "false") << ", " << (int)e.key << ", " << e.tickMs << "}, ";
+    for (const auto &e: noteEvents) {
+        output << "{" << (int) e.track << ", " << (e.isOn ? "true" : "false") << ", " << (int) e.key << ", " << e.tickMs << "}, ";
     }
     output << "};";
 

@@ -45,19 +45,17 @@ int main(int argc, char **argv)
 
     midiFile.joinTracks();
     midiFile.deltaTicks();
-    int track = 0;
-    int eventCount = midiFile.getEventCount(track);
-    cout << eventCount << endl;
+    int eventCount = midiFile.getEventCount(0);
 
     for (int i = 0; i < eventCount; ++i) {
-        MidiEvent event = midiFile.getEvent(track, i);
+        MidiEvent event = midiFile.getEvent(0, i);
+        int track = event.track;
         int tick = event.tick;
         int key = event.getKeyNumber();
         int velocity = event.getVelocity();
-        cout << "tick:" << tick << "\t" << "key:" << key << "\t" << "velocity:" << velocity << endl;
-        if (key == -1) {
-            continue;
-        }
+        cout << "track:" << track << "\t" << "tick:" << tick << "\t" << "key:" << key << "\t" << "velocity:" << velocity << endl;
+        if (key == -1) continue;
+        if (track == 0) continue;
         if (event.isNoteOn()) {
             fluid_synth_noteon(synth, 0, key, velocity);
         }
