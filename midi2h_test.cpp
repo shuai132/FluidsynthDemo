@@ -25,15 +25,23 @@ int main(int argc, char **argv)
     fluid_synth_sfload(synth, sfPath, 1);
     fluid_synth_set_gain(synth, 1.0);
 
-    playMusic(QuanYeCha, sizeof QuanYeCha, [&](NoteEvent e)
+    playMusic(SuperMario, sizeof SuperMario, [&](NoteEvent e)
     {
+        float speed = 1;
+//        if (e.track != 3) {
+//            this_thread::sleep_for(std::chrono::milliseconds((uint16_t) ((float) e.tickMs / speed)));
+//            return;
+//        }
+        cout << "track:" << (int)e.track
+             << "\t" << "on:" << (int)e.isOn
+             << "\t" << "key:" << (int)e.key
+             << "\t" << "tickMs:" << e.tickMs << endl;
         if (e.isOn) {
             fluid_synth_noteon(synth, 0, e.key, 127);
         }
         else {
             fluid_synth_noteoff(synth, 0, e.key);
         }
-        float speed = 1;
         this_thread::sleep_for(std::chrono::milliseconds((uint16_t) ((float) e.tickMs / speed)));
     });
 
