@@ -4,8 +4,14 @@ project(FluidsynthDemo)
 
 set(CMAKE_CXX_STANDARD 11)
 
-include_directories(/usr/local/include)
-link_directories(/usr/local/lib)
+include_directories(
+        /usr/local/include
+        /opt/homebrew/opt/fluidsynth/include
+)
+link_directories(
+        /usr/local/lib
+        /opt/homebrew/opt/fluidsynth/lib
+)
 
 add_subdirectory(lib/midifile)
 
